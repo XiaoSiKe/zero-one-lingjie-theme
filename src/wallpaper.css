@@ -1,0 +1,65 @@
+/* Long March Terminal visual treatment, adapted to neutral phosphor.
+   Original author: Soviet-Dreadnaught, MIT. See THIRD_PARTY_NOTICES.md. */
+:host { color:#e5e5e5; font-family:ui-monospace,'SFMono-Regular',Menlo,'PingFang SC',monospace; user-select:none; }
+* { box-sizing:border-box; }
+.scene { position:absolute; inset:0; overflow:hidden; container-type:size; }
+.effect-field { position:absolute; inset:0; overflow:hidden; }
+.terminal-grid { position:absolute; inset:0; background-image:linear-gradient(#ffffff0a 1px,transparent 1px),linear-gradient(90deg,#ffffff0a 1px,transparent 1px),radial-gradient(ellipse at 50% 0%,#ffffff08,transparent 65%); background-size:34px 34px,34px 34px,100% 100%; }
+.watermark { position:absolute; left:50%; top:52%; width:min(650px,72cqh,76cqw); aspect-ratio:.97; transform:translate(-50%,-50%); overflow:hidden; opacity:.11; mix-blend-mode:screen; animation:watermark-pulse 22s ease-in-out infinite; }
+.watermark img { display:block; position:absolute; max-width:none; width:238%; height:auto; left:-69%; top:-71%; }
+.data-rain { position:absolute; inset:0; opacity:.38; mask-image:linear-gradient(180deg,transparent 0,#000 15%,#000 78%,transparent 100%); }
+.rain-column { position:absolute; top:-20%; width:1ch; white-space:pre-wrap; word-break:break-all; line-height:1.06; color:#a7a7a7; text-shadow:0 0 6px #ffffff33; animation-name:data-fall; animation-timing-function:linear; animation-iteration-count:infinite; }
+.rain-head { color:#fff; text-shadow:0 0 8px #ffffff80; }
+.rain-near { color:#c4c4c4; }
+.rain-far { color:#7b7b7b; text-shadow:none; }
+.data-packets { position:absolute; inset:0; overflow:hidden; opacity:.35; mask-image:linear-gradient(transparent,#000 12%,#000 86%,transparent); }
+.flow-packet { position:absolute; top:-110px; width:1px; height:96px; background:linear-gradient(transparent,#e5e5e5); animation:packet-fall 4.7s linear infinite; }
+.flow-packet::after { content:""; position:absolute; bottom:0; left:-2px; width:5px; height:7px; background:#eee; }
+.crt-scan { position:absolute; inset:0; background-image:linear-gradient(#ffffff06 1px,transparent 1px); background-size:100% 3px; opacity:.65; }
+.crt-sweep { position:absolute; left:0; right:0; top:-12%; height:12%; border-bottom:1px solid #ffffff1c; background:linear-gradient(180deg,transparent,#ffffff0e); animation:crt-sweep 5s linear infinite; }
+.arrival-sweep { position:absolute; left:2%; right:2%; top:45%; height:1px; opacity:0; background:#eee; box-shadow:0 -7px 0 #ffffff12,0 7px 0 #ffffff12; }
+.vignette { position:absolute; inset:0; background:radial-gradient(ellipse at 50% 50%,transparent 42%,#0008 100%); }
+.mechanical-perimeter { position:absolute; inset:0; width:100%; height:100%; opacity:.67; }
+.mechanical-perimeter path { vector-effect:non-scaling-stroke; }
+.frame-line { stroke:#9b9b9b; stroke-width:1; }
+.frame-secondary { stroke:#555; stroke-width:.7; }
+.frame-ticks { stroke:#aaa; stroke-width:1; }
+.frame-lock { fill:#999; stroke:#bdbdbd; stroke-width:.7; }
+.servo-guide { stroke:#777; stroke-width:.7; }
+.clamp-teeth { stroke:#c7c7c7; stroke-width:1.2; }
+.clamp-left { animation:clamp-left 3.6s cubic-bezier(.77,0,.175,1) infinite; }
+.clamp-right { animation:clamp-right 3.6s cubic-bezier(.77,0,.175,1) infinite; }
+.shuttle-body { fill:#c4c4c4; stroke:#eee; stroke-width:.8; }
+.shuttle-cut { stroke:#333; stroke-width:1; }
+.track-shuttle-left { animation:shuttle-left 5.2s cubic-bezier(.77,0,.175,1) infinite; }
+.track-shuttle-right { animation:shuttle-right 5.2s cubic-bezier(.77,0,.175,1) infinite; }
+.rail-light { stroke:#ddd; stroke-width:2; }
+.rail-packet-top { animation:rail-top 3.8s linear infinite; }
+.rail-packet-bottom { animation:rail-bottom 3.8s linear infinite; }
+.hero-label { position:absolute; top:24%; left:50%; transform:translate(-50%,-50%); width:90%; text-align:center; }
+h1 { position:relative; display:inline-block; max-width:calc(100% - 40px); margin:0 0 12px; color:#f0f0f0; font-size:25px; letter-spacing:.08em; font-weight:500; text-shadow:0 0 12px #ffffff20; }
+p { margin:0; color:#aaa; font-size:12px; line-height:1.7; letter-spacing:.08em; }
+.terminal-cursor { position:absolute; left:calc(100% + 10px); top:50%; transform:translateY(-50%); width:8px; height:22px; background:#ddd; animation:cursor-blink 1.4s steps(1,end) infinite; }
+.terminal-caption { position:absolute; bottom:28px; inset-inline:32px; display:flex; justify-content:space-between; color:#939393; font-size:10px; letter-spacing:.08em; }
+:host([data-active="true"]) .hero-label { display:none; }
+:host([data-active="true"]) .data-rain { opacity:.07; }
+:host([data-active="true"]) .watermark { opacity:.035; }
+:host([data-active="true"]) .crt-scan { opacity:.2; }
+:host([data-active="true"]) .crt-sweep { display:none; }
+:host([data-active="true"]) .data-packets { display:none; }
+:host([data-active="true"]) .mechanical-perimeter { opacity:.15; }
+:host([data-integrated="true"]) .terminal-caption { display:none; }
+:host([data-paused="true"]) * { animation-play-state:paused!important; }
+@keyframes data-fall { from{transform:translateY(-100%)}to{transform:translateY(100cqh)} }
+@keyframes packet-fall { from{transform:translateY(0)}to{transform:translateY(calc(100cqh + 110px))} }
+@keyframes shuttle-left { 0%,8%,100%{transform:translateY(0)}46%,58%{transform:translateY(420px)} }
+@keyframes shuttle-right { 0%,8%,100%{transform:translateY(0)}46%,58%{transform:translateY(-420px)} }
+@keyframes clamp-left { 0%,15%,100%{transform:translateX(0)}45%,65%{transform:translateX(10px)} }
+@keyframes clamp-right { 0%,15%,100%{transform:translateX(0)}45%,65%{transform:translateX(-10px)} }
+@keyframes rail-top { 0%{transform:translateX(0);opacity:.1}15%,85%{opacity:1}100%{transform:translateX(450px);opacity:.1} }
+@keyframes rail-bottom { 0%{transform:translateX(0);opacity:.1}15%,85%{opacity:1}100%{transform:translateX(-450px);opacity:.1} }
+@keyframes crt-sweep { from{transform:translateY(0)}to{transform:translateY(130cqh)} }
+@keyframes watermark-pulse { 0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.045)} }
+@keyframes cursor-blink { 0%,64%{opacity:1}65%,100%{opacity:.25} }
+@media(prefers-reduced-motion:reduce) { * {animation:none!important;} .rain-column{top:0;opacity:.25!important;} .crt-sweep,.data-packets{display:none;} }
+@container(max-width:600px) { .rain-column:nth-child(2n){display:none;} h1{font-size:20px;} p{font-size:11px;max-width:26em;margin:auto;} .terminal-caption span:last-child{display:none;} }

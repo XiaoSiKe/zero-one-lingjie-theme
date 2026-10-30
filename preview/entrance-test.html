@@ -1,0 +1,40 @@
+<!doctype html><html lang="zh-CN"><meta charset="UTF-8"><title>桌面入场检查</title>
+<style>body{margin:0;background:#000;color:#eee;font:14px sans-serif}#root{height:650px}.fixture_sidebarCol{position:absolute;inset:0 auto 0 0;width:200px}[data-conversation-region]{position:absolute;inset:50px 0 100px 200px}[data-composer-card]{position:absolute;bottom:0;left:20px;width:350px;height:80px}#opening{position:fixed;inset:0;width:100%;height:100%;z-index:20}pre{position:relative;z-index:50;margin-top:680px}</style>
+<body data-ds-dark-theme><div id="root" inert><aside class="fixture_sidebarCol"></aside><main data-conversation-region><div data-composer-card><textarea aria-label="输入检查"></textarea></div></main></div><iframe id="opening" title="DSH startup animation" srcdoc="<body style='background:black;color:white'>模拟开场</body>"></iframe><pre id="results">运行中</pre>
+<script>window.__ModuleLoader__={load(def){window.plugin=def.factory()}};</script><script src="/lib/client.js"></script>
+<script type="module">
+const results=[],disposers=[];
+const tick=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const ctx={effect(fn){disposers.push(fn())},theme:{overrideTokens(){return()=>{}}}};
+const host=()=>document.querySelector('.zero-one-wallpaper');
+const unload=()=>{while(disposers.length)disposers.pop()()};
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function check(name,value){results.push({name,pass:!!value});if(!value)throw Error(name)}
+try{
+window.plugin.apply(ctx);await tick();
+check('开场未结束时不播放入场',!host().dataset.entranceCount);
+check('开场仍在时壁纸隐藏',host().style.display==='none');
+document.querySelector('#opening').remove();document.querySelector('#root').inert=false;
+await tick();await sleep(200);
+check('开场退出后触发入场',host().dataset.entranceCount==='1');
+check('正在播放或按系统偏好静止',host().dataset.entrance===(reduced?'idle':'running'));
+const c=document.querySelector('[data-composer-card]').getBoundingClientRect();
+check('入场期间输入区可点击',!!document.elementFromPoint(c.left+12,c.top+12)?.closest('[data-composer-card]'));
+const shadow=host().shadowRoot;
+check('数据雨进入时加速',reduced||shadow.querySelector('.rain-column').getAnimations().some(a=>a.playbackRate>1));
+await sleep(1900);
+check('入场完成后自动清理',host().dataset.entrance==='idle');
+check('恢复正常数据雨速度',shadow.querySelector('.rain-column').getAnimations().every(a=>a.playbackRate===1));
+document.querySelector('[data-conversation-region]').style.width='600px';await tick();await sleep(750);
+check('布局变化不重复入场',host().dataset.entranceCount==='1');
+const opening=document.createElement('div');opening.id='dsh-startup-root';opening.textContent='模拟环轨开场';document.body.append(opening);await tick();
+check('兼容另一种开场根节点',host().style.display==='none');
+opening.classList.add('dsu-gone');await tick();await sleep(200);
+check('再次完成开场后可重新入场',host().dataset.entranceCount==='2');
+unload();opening.remove();await tick();
+check('播放中停用完整清理',!host()&&!document.querySelector('.zero-one-chassis'));
+check('输入框不残留动画',document.querySelector('[data-composer-card]').getAnimations().length===0);
+}catch(e){results.push({name:e.message,pass:false});unload()}
+document.querySelector('#results').textContent=results.map(r=>(r.pass?'PASS':'FAIL')+' '+r.name).join('\n');document.title=results.every(r=>r.pass)?'PASS — 桌面入场检查':'FAIL — 桌面入场检查';
+</script></body></html>

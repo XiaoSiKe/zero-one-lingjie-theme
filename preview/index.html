@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>零一·凌界 — 社团桌面壁纸</title>
+<link rel="stylesheet" href="/src/theme.css"><style>
+:root{color-scheme:dark;font-family:'Helvetica Neue','PingFang SC',sans-serif;background:#000;color:#eee}*{box-sizing:border-box}body{margin:0}button,textarea{font:inherit}button{cursor:pointer;color:inherit;background:#171717;border:1px solid #383838;border-radius:6px;min-height:38px;padding:0 14px}button:hover{background:#262626}button:focus-visible,textarea:focus-visible{outline:2px solid #ddd;outline-offset:4px}#stage{height:100dvh;position:relative;background:#000;overflow:hidden}#art{position:absolute;inset:0}#controls{position:fixed;right:24px;top:24px;z-index:20;display:flex;gap:8px;align-items:center}#controls small{font-size:11px;color:#aaa;margin-right:9px}.sidebar{display:none;position:absolute;inset:0 auto 0 0;width:220px;background:#0b0b0b;border-right:1px solid #202020;padding:30px 20px}.sidebar strong{font-size:15px;font-weight:500}.sidebar p{font-size:12px;color:#aaa;line-height:2}.sidebar button{width:100%;margin-top:30px}.sidebar .note{position:absolute;bottom:24px;left:20px;right:20px;font-size:11px;color:#999;line-height:1.8}.composer{display:none;position:absolute;z-index:12;bottom:52px;left:calc(50% + 110px);transform:translateX(-50%);width:min(640px,calc(100% - 300px));border:1px solid #333;border-radius:14px;background:#111;padding:16px}.composer textarea{width:100%;height:50px;resize:none;border:0;background:none;color:#eee;outline:0;line-height:1.6}.composer textarea::placeholder{color:#aaa}.composer footer{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#999}.composer button{background:#ddd;color:#111;width:38px;padding:0;font-size:20px}.desktop .sidebar,.desktop .composer{display:block}.desktop #art{left:220px;bottom:170px}.desktop #controls{top:20px}.pure #controls{display:none}.pure .sidebar,.pure .composer{display:none}.pure #art{inset:0}.hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-size:11px;color:#aaa;z-index:20}.pure .hint{display:none}@media(max-width:700px){#controls{right:12px;top:12px;gap:5px}#controls small{display:none}button{font-size:11px;padding:0 9px;min-height:36px}.desktop .sidebar{display:none}.desktop #art{left:0}.desktop .composer{left:50%;width:calc(100% - 32px)}.desktop #controls{top:12px}.hint{white-space:nowrap;font-size:10px}.desktop #art{bottom:180px}}
+</style></head><body>
+<main id="stage"><aside class="sidebar"><strong>零一工作区</strong><button id="new">＋ 新对话</button><p>最近的想法<br>从一件小事开始</p><div class="note">这是壁纸布局示意。<br>未连接 DSH，不会发送消息。</div></aside><div id="art"></div><form class="composer"><textarea aria-label="模拟输入框" placeholder="今天，想从哪个想法开始？"></textarea><footer><span>布局预览 · 输入仅用于检查可读性</span><button type="button" aria-label="预览按钮，不发送消息">↑</button></footer></form></main>
+<nav id="controls" aria-label="壁纸预览设置"><small>零一·凌界 / 壁纸预览</small><button id="mode" aria-pressed="false">查看桌面布局</button><button id="motion" aria-pressed="true">动态：开</button><button id="entrance">重播桌面入场</button><button id="pure">纯壁纸 ↗</button></nav><div class="hint">按 H 隐藏控件 · 按 Esc 恢复</div>
+<script type="module">
+import {mountWallpaper} from '/src/wallpaper.js';
+const css=await fetch('/src/wallpaper.css').then(r=>r.text());
+const wallpaper=mountWallpaper(document.querySelector('#art'),{logo:'/assets/rixin-logo.jpg',css});
+wallpaper.playEntrance();
+document.querySelector('#entrance').onclick=()=>wallpaper.playEntrance();
+let motion=true;
+const mode=document.querySelector('#mode'), toggle=document.querySelector('#motion');
+mode.onclick=()=>{const on=document.body.classList.toggle('desktop');mode.textContent=on?'查看纯壁纸':'查看桌面布局';mode.setAttribute('aria-pressed',String(on))};
+toggle.onclick=()=>{motion=!motion;wallpaper.setMotion(motion);toggle.textContent=motion?'动态：开':'动态：关';toggle.setAttribute('aria-pressed',String(motion))};
+document.querySelector('#pure').onclick=()=>document.body.classList.add('pure');
+document.querySelector('#new').onclick=()=>document.querySelector('textarea').value='';
+document.querySelector('form').onsubmit=e=>e.preventDefault();
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.body.classList.remove('pure');if(e.key.toLowerCase()==='h'&&!['TEXTAREA','INPUT'].includes(e.target.tagName))document.body.classList.toggle('pure')});
+if(new URLSearchParams(location.search).has('pure'))document.body.classList.add('pure');
+</script></body></html>

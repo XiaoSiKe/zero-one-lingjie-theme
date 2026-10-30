@@ -1,0 +1,73 @@
+<!doctype html><html lang="zh-CN"><meta charset="UTF-8"><title>壁纸适配验证</title>
+<style>body{background:#000;color:#ddd;font:14px sans-serif}#root{height:700px} [data-conversation-region]{position:absolute;inset:80px 20px 100px} [data-composer-card]{position:absolute;bottom:0;height:70px;width:300px}pre{position:relative;z-index:20;background:#111;padding:20px}</style>
+<body data-ds-dark-theme><div id="root"><aside data-slot="sidebar" class="fixture_sidebarCol"><div class="fixture_brandIdentity"><span>Original brand</span></div></aside><main data-conversation-region><div class="fixture_headline"><span class="fixture_titleGroup">原始欢迎标题</span></div><div data-composer-card><textarea aria-label="输入检查"></textarea></div></main></div><pre id="results">运行中</pre>
+<script>window.__ModuleLoader__={load(def){window.plugin=def.factory()}};</script><script src="/lib/client.js"></script>
+<script type="module">
+const results=[],disposers=[];
+const tick=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+const ctx={effect(fn){disposers.push(fn())},theme:{overrideTokens(source,tokens){
+ const old=new Map(); for(const [key,value] of Object.entries(tokens)){old.set(key,document.body.style.getPropertyValue(key));document.body.style.setProperty(key,value.dark)}
+ return ()=>{for(const [key,value] of old){if(value)document.body.style.setProperty(key,value);else document.body.style.removeProperty(key)}}
+}}};
+const unload=()=>{while(disposers.length)disposers.pop()()};
+const host=()=>document.querySelector('.zero-one-wallpaper');
+function luminance(color){ const rgb=color.match(/[\d.]+/g).slice(0,3).map(Number).map(x=>{x/=255;return x<=.04045?x/12.92:((x+.055)/1.055)**2.4});return .2126*rgb[0]+.7152*rgb[1]+.0722*rgb[2] }
+function contrast(a,b){let x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05)}
+function check(name,value){results.push({name,pass:!!value});if(!value)throw Error(name)}
+try{
+window.plugin.apply(ctx);await tick();
+check('全局主题应用',document.documentElement.hasAttribute('data-zero-one-theme'));
+check('主题令牌覆盖主背景',getComputedStyle(document.body).getPropertyValue('--dsw-alias-bg-base').trim()==='#000000');
+check('时间组件已彻底移除',!document.querySelector('.zero-one-clock,[role=timer]'));
+check('轻量机械边框存在',!!host().shadowRoot.querySelector('.mechanical-perimeter'));
+check('保留终端数据雨',host().shadowRoot.querySelectorAll('.rain-column').length===36);
+check('社团侧栏标识挂载',!!document.querySelector('.zero-one-sidebar-brand'));
+check('左上角仅文字，不含 Logo',!document.querySelector('.zero-one-sidebar-brand img'));
+check('原侧栏品牌隐藏',getComputedStyle(document.querySelector('.fixture_brandIdentity>span')).display==='none');
+check('全窗口机械边框挂载',!!document.querySelector('.zero-one-chassis'));
+check('独立挂载一层壁纸',document.querySelectorAll('.zero-one-wallpaper').length===1);
+check('挂载到 root，避免 body 全屏拖动问题',host().parentNode.id==='root');
+check('装饰不接收鼠标',getComputedStyle(host()).pointerEvents==='none');
+check('避免与原欢迎标题重叠',getComputedStyle(document.querySelector('.fixture_headline')).visibility==='hidden');
+check('Logo 使用内嵌本地资源',host().shadowRoot.querySelector('img').src.startsWith('data:image/jpeg;base64,'));
+const sidebarStyle=getComputedStyle(document.querySelector('.fixture_sidebarCol'));
+check('银白侧栏文字对比度达标',contrast(sidebarStyle.color,sidebarStyle.backgroundColor)>=4.5);
+check('侧栏使用亮色表面',luminance(sidebarStyle.backgroundColor)>.6);
+const movingPart=host().shadowRoot.querySelector('.rain-column');
+const beforeTransform=getComputedStyle(movingPart).transform;
+const shuttle=host().shadowRoot.querySelector('.track-shuttle-left');
+const shuttleBefore=getComputedStyle(shuttle).transform;
+await new Promise(resolve=>setTimeout(resolve,1200));
+check('机械滑块实际往复移动',matchMedia('(prefers-reduced-motion: reduce)').matches || getComputedStyle(shuttle).transform!==shuttleBefore);
+check('数据雨实际发生位移',matchMedia('(prefers-reduced-motion: reduce)').matches || getComputedStyle(movingPart).transform!==beforeTransform);
+const r=host().getBoundingClientRect(), c=document.querySelector('[data-composer-card]').getBoundingClientRect();
+check('壁纸覆盖整个主区域',r.bottom>=c.bottom);
+check('输入区已从视觉层挖空',getComputedStyle(host().shadowRoot.querySelector('.effect-field')).clipPath.includes('evenodd'));
+check('壁纸不拦截输入区点击',!!document.elementFromPoint(c.left+12,c.top+12)?.closest('[data-composer-card]'));
+check('移除旧装甲结构',!host().shadowRoot.querySelector('.mechanism')); 
+const region=document.querySelector('[data-conversation-region]');
+region.style.width='600px';await tick();await tick();
+check('窄窗口也不出现紧凑时钟',!document.querySelector('.zero-one-clock,[role=timer]'));
+region.style.width='';await tick();await tick();
+const turn=document.createElement('article');turn.dataset.turnProcess='';document.querySelector('main').append(turn);await tick();
+check('出现对话后收起中央图案',host().dataset.active==='true');
+check('对话状态停止动画',host().dataset.paused==='true');
+check('对话状态暂停机械运动',getComputedStyle(shuttle).animationPlayState==='paused'||matchMedia('(prefers-reduced-motion: reduce)').matches);
+check('对话状态隐藏高速光线',getComputedStyle(host().shadowRoot.querySelector('.data-packets')).display==='none');
+turn.remove();await tick();check('空白页恢复中央图案',host().dataset.active==='false');
+const dialog=document.createElement('div');dialog.setAttribute('role','dialog');dialog.setAttribute('aria-modal','true');document.body.append(dialog);await tick();
+check('弹窗出现时隐藏壁纸',host().style.display==='none');dialog.remove();await tick();
+document.body.removeAttribute('data-ds-dark-theme');await tick();check('浅色偏好下仍保持社团黑白主题',host().style.display==='block');
+document.body.setAttribute('data-ds-dark-theme','');await tick();check('深色模式恢复壁纸',host().style.display==='block');
+unload();await tick();check('停用插件移除装饰',!host());
+check('停用插件移除黑底样式',!document.getElementById('zero-one-theme-styles'));
+check('停用主题恢复令牌',!document.body.style.getPropertyValue('--dsw-alias-bg-base'));
+check('停用移除机械边框',!document.querySelector('.zero-one-chassis'));
+check('停用移除社团侧栏标识',!document.querySelector('.zero-one-sidebar-brand'));
+check('停用恢复原侧栏品牌',getComputedStyle(document.querySelector('.fixture_brandIdentity>span')).display!=='none');
+check('停用移除主题标记',!document.documentElement.hasAttribute('data-zero-one-theme'));
+check('停用插件恢复原欢迎标题',getComputedStyle(document.querySelector('.fixture_headline')).visibility==='visible');
+window.plugin.apply(ctx);await tick();check('重新启用无重复节点',document.querySelectorAll('.zero-one-wallpaper').length===1);unload();
+}catch(e){results.push({name:e.message,pass:false})}
+document.querySelector('#results').textContent=results.map(r=>(r.pass?'PASS':'FAIL')+' '+r.name).join('\n');document.title=results.every(r=>r.pass)?'PASS — 壁纸适配验证':'FAIL — 壁纸适配验证';
+</script></body></html>
