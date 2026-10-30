@@ -6,10 +6,10 @@
 <p>让每一次进入工作区，都成为从想法走向实践的起点。</p>
 
 <p>
-  <img src="https://img.shields.io/badge/version-0.9.0-262626?style=flat-square" alt="版本 0.9.0">
-  <img src="https://img.shields.io/badge/Node.js-22.19%2B-404040?style=flat-square" alt="Node.js 22.19+">
-  <img src="https://img.shields.io/badge/style-monochrome-171717?style=flat-square" alt="黑白视觉">
-  <img src="https://img.shields.io/badge/code-MIT-555555?style=flat-square" alt="代码 MIT 许可">
+  <img src="docs/badges/version.svg" alt="版本 0.9.1">
+  <img src="docs/badges/node.svg" alt="Node.js 22.19+">
+  <img src="docs/badges/style.svg" alt="黑白视觉">
+  <img src="docs/badges/license.svg" alt="代码 MIT 许可">
 </p>
 
 <p>
@@ -84,7 +84,7 @@
 
 | 文件 | 用途 |
 | :--- | :--- |
-| `dsh-plugin-01-wallpaper-0.9.0.tgz` | DSH 插件安装包，包含生成后的客户端和本地资源。 |
+| `dsh-plugin-01-wallpaper-0.9.1.tgz` | DSH 插件安装包，包含生成后的客户端和本地资源。 |
 | `Source code (zip)` | 完整源码，包含独立预览和开发脚本。 |
 | `SHA256SUMS.txt` | 安装包完整性校验。 |
 
@@ -97,7 +97,7 @@
 熟悉命令行的社员也可以使用 DSH 自带的 CLI：
 
 ```sh
-dsh plugin --profile desktop add /完整路径/dsh-plugin-01-wallpaper-0.9.0.tgz
+dsh plugin --profile desktop add /完整路径/dsh-plugin-01-wallpaper-0.9.1.tgz
 ```
 
 安装时保留 `lib/`、`package.json`、`cordis.patch.yml` 及许可文件。普通使用无需构建，也无需安装额外依赖。

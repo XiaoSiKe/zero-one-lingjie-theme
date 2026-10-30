@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-01-wallpaper",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "零一·凌界｜零一 AI 日新社专属 DSH 黑白机械终端主题，含动态数据雨与桌面入场衔接",
   "type": "module",
   "main": "lib/index.js",
@@ -15,7 +15,7 @@
     "THIRD_PARTY_NOTICES.md",
     "licenses",
     "LICENSE",
-    "docs/screenshots"
+    "docs"
   ],
   "dsh": {
     "bundle": {
